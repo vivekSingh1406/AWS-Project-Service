@@ -1,5 +1,5 @@
 # 1 - Project:- Example-S3-Lambda-RDS-Service
-![Architecture!](https://github.com/vivekSingh1406/AWS-Project/blob/main/Example-S3-Lambda-RDS-Service/vivek-singh.png)
+![Architecture!](https://github.com/vivekSingh1406/AWS-Project-Service/blob/main/Example-S3-Lambda-RDS-Service/vivek-singh.png)
 
 
 ### Full Spring Boot application
@@ -25,7 +25,7 @@
 - CloudWatch (automatic with Lambda)
 
 # 2 - Project:- Example-S3-Lambda-CloudFront-DynamoDB-Service
-![Architecture!](https://github.com/vivekSingh1406/AWS-Project/blob/main/Example-S3-Lambda-CloudFront-DynamoDB-Service/project.png)
+![Architecture!](https://github.com/vivekSingh1406/AWS-Project-Service/blob/main/Example-S3-Lambda-CloudFront-DynamoDB-Service/project.png)
 
 ### Full Serverless Web Application
 
