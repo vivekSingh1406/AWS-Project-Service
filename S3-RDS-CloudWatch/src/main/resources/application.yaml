@@ -1,0 +1,57 @@
+spring:
+  application:
+    name: S3-RDS-CloudWatch
+
+
+
+  # ---- Amazon RDS (MySQL) connection ----
+  # i have used local database,
+  datasource:
+    url: jdbc:mysql://localhost:3306/aws_services
+    username: admin
+    password: Admin@1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
+server:
+  port: 8080
+
+# ---- AWS ----
+cloud:
+  aws:
+      access-key:
+      secret-key:
+      region: ap-south-1
+  s3:
+      bucket-name: rds-service-spring-boot-application
+app:
+  presigned-url:
+    expiry-minutes: 15
+
+# ---- Actuator + Micrometer CloudWatch metrics ----
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  metrics:
+    export:
+      cloudwatch:
+        namespace: FileService
+        step: 1m
+        enabled: true
+
+logging:
+  level:
+    root: INFO
+    com.example.fileservice: DEBUG
+    software.amazon.awssdk: WARN
