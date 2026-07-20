@@ -43,3 +43,4 @@ public class FileUploadNotification {
     @Column(length = 1000)
     private String failureReason;
 }
+
