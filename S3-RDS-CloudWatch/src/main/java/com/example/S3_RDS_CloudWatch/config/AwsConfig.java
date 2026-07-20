@@ -9,6 +9,7 @@ import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.ses.SesClient;
 
 @Configuration
 public class AwsConfig {
@@ -45,6 +46,17 @@ public class AwsConfig {
                 .region(Region.of(region))
                 .credentialsProvider(
                         StaticCredentialsProvider.create(awsCredentials))
+                .build();
+    }
+
+    @Bean
+    public SesClient sesClient() {
+        AwsBasicCredentials awsCredentials =
+                AwsBasicCredentials.create(accessKey, secretKey);
+
+        return SesClient.builder()
+                .region(Region.of(region))
+                .credentialsProvider(StaticCredentialsProvider.create(awsCredentials))
                 .build();
     }
 }

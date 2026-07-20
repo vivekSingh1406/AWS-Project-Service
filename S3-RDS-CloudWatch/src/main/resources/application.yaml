@@ -33,6 +33,9 @@ cloud:
       region: ap-south-1
   s3:
       bucket-name: rds-service-spring-boot-application
+  ses:
+      # Must be a verified SES identity. Prefer AWS_SES_SENDER_EMAIL outside local development.
+      sender-email:
 app:
   presigned-url:
     expiry-minutes: 15

@@ -16,5 +16,6 @@ public class FileUploadResponse {
     private String originalFileName;
     private Long fileSizeBytes;
     private LocalDateTime uploadedAt;
+    private String emailNotificationStatus;
     private String message;
 }

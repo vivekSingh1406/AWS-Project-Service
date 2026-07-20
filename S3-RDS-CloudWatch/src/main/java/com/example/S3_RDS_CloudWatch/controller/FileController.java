@@ -7,9 +7,12 @@ import com.example.S3_RDS_CloudWatch.model.FileMetadata;
 import com.example.S3_RDS_CloudWatch.service.FileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -18,18 +21,23 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/files")
 @RequiredArgsConstructor
+@Validated
 public class FileController {
 
     private final FileService fileService;
 
     /**
      * POST /api/files/upload
-     * multipart/form-data with a single "file" part.
+     * multipart/form-data with file, name, and email parts.
      */
     @PostMapping(value = "/upload", consumes = "multipart/form-data")
-    public ResponseEntity<FileUploadResponse> uploadFile(@RequestParam("file") MultipartFile file) {
-        log.info("Received upload request: name={}, size={} bytes", file.getOriginalFilename(), file.getSize());
-        FileUploadResponse response = fileService.uploadFile(file);
+    public ResponseEntity<FileUploadResponse> uploadFile(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("name") @NotBlank String name,
+            @RequestParam("email") @NotBlank @Email String email) {
+        log.info("Received upload request: fileName={}, size={} bytes, recipient={}",
+                file.getOriginalFilename(), file.getSize(), email);
+        FileUploadResponse response = fileService.uploadFile(file, name, email);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
