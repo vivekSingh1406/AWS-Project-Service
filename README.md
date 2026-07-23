@@ -1,5 +1,4 @@
 # AWS Deployment — Spring Boot & Serverless Projects
----
 
 ## Table of Contents
 1. [Project 1: Deploy Spring Boot on EC2](#project-1-deploy-spring-boot-on-ec2)
@@ -128,7 +127,6 @@ http://<ec2-public-ip>:8080
 
 **Repo:** [`Example-S3-Lambda-RDS-Service`](https://github.com/vivekSingh1406/AWS-Project-Service/blob/main/Example-S3-Lambda-RDS-Service/vivek-singh.png)
 
-### Overview
 A full Spring Boot application that ingests data via REST, stores it in S3, and pipes it into RDS through an event-driven Lambda — with CloudWatch handling observability.
 
 ### Flow
@@ -163,7 +161,6 @@ A full Spring Boot application that ingests data via REST, stores it in S3, and 
 
 **Repo:** [`Example-S3-Lambda-CloudFront-DynamoDB-Service`](https://github.com/vivekSingh1406/AWS-Project-Service/blob/main/Example-S3-Lambda-CloudFront-DynamoDB-Service/project.png)
 
-### Overview
 A fully serverless web application — static frontend delivered globally via CloudFront, backed by API Gateway, Lambda, and DynamoDB.
 
 ### Flow
