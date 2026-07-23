@@ -1,167 +1,218 @@
+# AWS Deployment Guide — Spring Boot & Serverless Projects
 
-## Deploy Spring boot application on EC2
-- Launch EC2 Instance
-- Launch a new EC2 instance (Amazon Linux 2 or Ubuntu preferred)
-- Select a key pair (or create one) for SSH access.
-- Connect to EC2 via SSH(Use the following SSH command to connect to your instance)
+A collection of deployment walkthroughs: a manual EC2 deployment for Spring Boot, plus two serverless architecture projects (S3 → Lambda → RDS, and S3 → Lambda → CloudFront → DynamoDB).
+
+---
+
+## Table of Contents
+1. [Project 1: Deploy Spring Boot on EC2](#project-1-deploy-spring-boot-on-ec2)
+2. [Project 2: S3-Lambda-RDS Service](#project-2-s3-lambda-rds-service)
+3. [Project 3: S3-Lambda-CloudFront-DynamoDB Service](#project-3-s3-lambda-cloudfront-dynamodb-service)
+
+---
+
+## Project 1: Deploy Spring Boot on EC2
+
+Manual deployment of a Spring Boot JAR onto a single EC2 instance — good for learning or small/dev workloads.
+
+### Step 1 — Launch an EC2 Instance
+1. Go to **EC2 Console → Launch Instance**.
+2. Choose an AMI: **Amazon Linux 2** or **Ubuntu 22.04 LTS** (both covered below).
+3. Choose an instance type — `t2.micro` / `t3.micro` (free-tier eligible) is enough for testing.
+4. Select or create a **key pair** (`.pem` file) — required for SSH access. Store it securely; you can't re-download it later.
+5. Configure the **Security Group**:
+   - Allow **SSH (22)** from your IP (not `0.0.0.0/0`, for security).
+   - Allow **Custom TCP (8080)** from `0.0.0.0/0` (or your IP, if restricting access) — this is covered again in Step 7, but it's easiest to add it up front.
+6. Launch the instance and wait for it to reach the **Running** state.
+
+### Step 2 — Connect via SSH
+```bash
+chmod 400 /path/to/your-key.pem
+ssh -i /path/to/your-key.pem ec2-user@<public-ip-address>      # Amazon Linux
+ssh -i /path/to/your-key.pem ubuntu@<public-ip-address>        # Ubuntu
 ```
-  ssh -i /path/to/your-key.pem ec2-user@<public-ip-address>
-```
-- Since the project is hosted on GitHub, install the Git client 
-```
+
+### Step 3 — Install Git, Java, and Maven
+
+**Amazon Linux 2:**
+```bash
+sudo yum update -y
 sudo yum install git -y
-```
-- Clone the GitHub repository
-```
-git clone ---https-url----
-cd your-repository-name
-```
-- install maven and java(EC2 machine to build or run application)
-```
+sudo yum install java-17-amazon-corretto -y   # match your project's Java version
 sudo yum install maven -y
 ```
-- mvc clean package (package project in jar file)
-```
-java -jar target/project-name
-```
-- Go to the Security Group associated with your EC2 instance.
-- Edit Inbound Rules and allow Custom TCP on port 8080 (or whichever your app uses) from Anywhere (0.0.0.0/0).
-- Obtain the public IP address of your EC2 instance and use it to access your application in a web browser
 
-    
-# Spring Boot AWS-S3 File Upload Project
-
-This project demonstrates how to upload files directly to Amazon S3 using a Spring Boot application. The application allows users to upload files through a web interface, and those files are then stored in an S3 bucket.
-
-## Features
-- Upload files directly to AWS S3 from a web interface.
-- Spring Boot integration with AWS SDK.
-- No need to store files locally; files are streamed directly to S3.
-
-## Prerequisites
-- Java 17 (or higher)
-- AWS S3 Account with appropriate permissions
-
-## Project Setup
-### 1. Set Up AWS S3
-1. **Create an S3 Bucket**:
-    - Log in to your [AWS Management Console](https://aws.amazon.com/console/).
-    - Navigate to **S3** and create a new bucket.
-    - Make sure to note down the **bucket name** and the **region** where the bucket is created.
-
-2. **IAM User & Credentials**:
-    - Create an IAM user with `AmazonS3FullAccess` permissions or a custom policy that allows uploading files to S3.
-    - Obtain the **AWS Access Key ID** and **AWS Secret Access Key** for the IAM user.
-
-### 2. Configure the Project
-You need to provide your AWS credentials and bucket information to the application. You can do this by modifying the `application.properties` file.
-
-#### 2.1 Open `src/main/resources/application.properties` and configure it as follows:
-
-```properties
-# AWS S3 Configuration
-cloud.aws.credentials.access-key=your-access-key-id
-cloud.aws.credentials.secret-key=your-secret-key
+**Ubuntu:**
+```bash
+sudo apt update -y
+sudo apt install git -y
+sudo apt install openjdk-17-jdk -y
+sudo apt install maven -y
 ```
 
-Replace the values with:
-- `your-access-key-id`: Your AWS Access Key.
-- `your-secret-key`: Your AWS Secret Key.
-- `your-region`: The AWS region where your S3 bucket is located (e.g., `us-east-1`).
-
-##### createBucket, deleteBucket, deleteFile, uploadFile
-```properties
-# Get(createBucket)
-http://localhost:8080/s3bucket/add/fist-bucket-vivek
-# Del(deleteBucket)
-http://localhost:8080/s3bucket/delete/bucket/fist-bucket-vivek
-# Del(deleteFile)
-http://localhost:8080/s3bucket/delete/file/fist-bucket-vivek/vivek_singh_bais.pdf
-# Post(uploadFile)
-http://localhost:8080/s3bucket/upload/file/fist-bucket-vivek
+Verify installs:
+```bash
+java -version
+mvn -version
+git --version
 ```
 
-# Spring Boot AWS-RDS database
-##### Create a RDS MySQL instance
-- Use Free Tier
-- Username will be 'admin' and you can set password(you can't use special character)
-- Keep the public access to true to access it from local or remote server
-- Create a security group(and allow 3306 from everywhere
-- After creating, you can find endpoint(hostname) to connect to this DB
-  ```
-  url: jdbc:mysql://<rds-endpoint>:3306/<database-name>
-  username: <username>
-  password: <password>
-  driver-class-name: com.mysql.cj.jdbc.Driver
-  ```
+### Step 4 — Clone the Repository
+```bash
+git clone <your-https-repo-url>
+cd your-repository-name
+```
 
-  
-# Spring Boot SQS Integration: Message Publisher and Consumer
+### Step 5 — Build the JAR
+```bash
+mvn clean package -DskipTests
+```
+This produces a JAR under `target/`, typically `target/your-project-name-0.0.1-SNAPSHOT.jar`.
 
-- I have created an SQS queue using the AWS Console by navigating to Amazon SQS and clicking "Create queue."
-- I have developed two Spring Boot applications — one acts as a producer and the other as a consumer.
-- In the producer application, I created an API that accepts key-value JSON data such as:
-  ```
-  {
-    "type" : "deep",
-    "description" : "i am java full stack developer"
-  }
-  ```
-- We are using Spring Scheduler to poll messages from the AWS SQS queue.
-- After pulling a message from the queue, we must handle it properly by acknowledging the message and sending a delete request using the message's receipt handle.
-- If we do not delete the message after processing, it will remain in the queue and may be delivered again, which can lead to message duplication.
-  ```properties
-  
-  app.config.message.queue.topic=my-sqs-queue
-  app.config.aws.access_key_id=YOUR_AWS_ACCESS_KEY
-  app.config.aws.secret_key_id=YOUR_AWS_SECRET_KEY
-  ```
+### Step 6 — Run the Application
+
+**Quick test (foreground):**
+```bash
+java -jar target/your-project-name-0.0.1-SNAPSHOT.jar
+```
+
+**Keep it running after you disconnect SSH** — pick one:
+
+*Option A: `nohup` (simplest)*
+```bash
+nohup java -jar target/your-project-name-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
+```
+
+*Option B: `systemd` service (recommended for anything beyond a demo)*
+```bash
+sudo tee /etc/systemd/system/springapp.service > /dev/null <<EOF
+[Unit]
+Description=Spring Boot Application
+After=network.target
+
+[Service]
+User=ec2-user
+ExecStart=/usr/bin/java -jar /home/ec2-user/your-repository-name/target/your-project-name-0.0.1-SNAPSHOT.jar
+SuccessExitStatus=143
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl enable springapp
+sudo systemctl start springapp
+sudo systemctl status springapp
+```
+This auto-restarts the app on crash or reboot, and lets you use `journalctl -u springapp -f` to tail logs.
+
+### Step 7 — Open the App Port in the Security Group
+1. **EC2 Console → Instances → select instance → Security tab → Security Group**.
+2. **Edit inbound rules → Add rule**:
+   - Type: `Custom TCP`
+   - Port: `8080` (or your app's `server.port`)
+   - Source: `0.0.0.0/0` (public) or your IP range (restricted)
+3. Save rules.
+
+### Step 8 — Access the Application
+```
+http://<ec2-public-ip>:8080
+```
+
+### Notes & Best Practices
+- Use an **Elastic IP** if you don't want the public IP to change on instance restart.
+- For production, put the app behind an **Application Load Balancer** + **ACM (HTTPS)** rather than exposing 8080 directly.
+- Consider externalizing config via environment variables or AWS **Systems Manager Parameter Store** instead of hardcoding secrets.
 
 ---
+
+## Project 2: S3-Lambda-RDS Service
+
+**Repo:** [`Example-S3-Lambda-RDS-Service`](https://github.com/vivekSingh1406/AWS-Project-Service/blob/main/Example-S3-Lambda-RDS-Service/vivek-singh.png)
+
+### Overview
+A full Spring Boot application that ingests data via REST, stores it in S3, and pipes it into RDS through an event-driven Lambda — with CloudWatch handling observability.
+
+### Flow
+1. Client sends a **POST** request (e.g., via Postman) to the Spring Boot REST API.
+2. The Spring Boot app uploads the payload to an **S3 bucket** (via AWS SDK).
+3. The S3 upload event **triggers a Lambda function**.
+4. The Lambda function parses the data and writes it into an **RDS instance** (MySQL/PostgreSQL).
+5. **CloudWatch** automatically captures Lambda execution logs and metrics.
+
+### Components
+
+| Layer | Technology |
+|---|---|
+| API | Spring Boot REST Controller |
+| Storage integration | AWS SDK for Java (S3 client) |
+| Event processing | AWS Lambda (triggered on S3 `ObjectCreated`) |
+| Database | Amazon RDS (MySQL/PostgreSQL) |
+| Access control | IAM roles/policies (S3 → Lambda → RDS) |
+| Monitoring | Amazon CloudWatch (auto-enabled for Lambda) |
+
+### Setup Checklist
+- [ ] Spring Boot REST controller accepts POST payloads and uses the AWS SDK to `putObject` into S3.
+- [ ] S3 bucket configured with an event notification on `s3:ObjectCreated:*` targeting the Lambda function.
+- [ ] Lambda execution role has permissions for `s3:GetObject` and RDS network/DB access.
+- [ ] Lambda deployed inside the same VPC as RDS (or with a properly configured security group / VPC peering) so it can reach the database.
+- [ ] RDS security group allows inbound traffic from the Lambda's security group on the DB port.
+- [ ] CloudWatch log group created automatically for the Lambda function — verify logs after a test upload.
+
 ---
-# Project-1 :- Example-S3-Lambda-RDS-Service
-![Architecture!](https://github.com/vivekSingh1406/AWS-Project-Service/blob/main/Example-S3-Lambda-RDS-Service/vivek-singh.png)
 
+## Project 3: S3-Lambda-CloudFront-DynamoDB Service
 
-### Full Spring Boot application
+**Repo:** [`Example-S3-Lambda-CloudFront-DynamoDB-Service`](https://github.com/vivekSingh1406/AWS-Project-Service/blob/main/Example-S3-Lambda-CloudFront-DynamoDB-Service/project.png)
 
-- Receives data via POST request (e.g., using Postman),
-- Uploads that data to an S3 bucket in AWS,
-- Triggers a Lambda function when new data is uploaded,
-- The Lambda function then stores the data into an RDS (Relational Database Service) instance,
-- And CloudWatch is used for logging
+### Overview
+A fully serverless web application — static frontend delivered globally via CloudFront, backed by API Gateway, Lambda, and DynamoDB.
 
+### Flow
+```
+User → CloudFront → S3 (static frontend)
+User's browser → API Gateway → Lambda (GET/POST) → DynamoDB
+```
+1. User accesses the frontend (HTML/React/Angular) through **CloudFront**.
+2. The frontend is hosted in an **S3 bucket** and distributed globally via CloudFront for low-latency delivery.
+3. The frontend calls **API Gateway**, the single entry point for backend requests.
+4. API Gateway routes requests to **Lambda functions**:
+   - **GET Lambda** → reads from DynamoDB.
+   - **POST Lambda** → writes to DynamoDB.
+5. **DynamoDB** serves as the fully managed NoSQL backend.
+6. **CloudWatch** (always active, not shown in the architecture diagram) monitors logs and metrics for both Lambda and API Gateway.
 
-### Spring Boot Project
+### Components
 
-- REST Controller to receive data
-- AWS SDK integration to upload to S3
+| Layer | Technology |
+|---|---|
+| Frontend | Static HTML/JS |
+| CDN | Amazon CloudFront |
+| Static hosting | Amazon S3 |
+| API layer | Amazon API Gateway |
+| Compute | AWS Lambda (separate GET/POST functions) |
+| Database | Amazon DynamoDB |
+| Monitoring | Amazon CloudWatch |
 
-### AWS Resources
+### Setup Checklist
+- [ ] S3 bucket configured for static website hosting (or as a CloudFront origin with Origin Access Control).
+- [ ] CloudFront distribution created, pointing to the S3 bucket, with HTTPS enforced.
+- [ ] API Gateway REST/HTTP API created with `GET` and `POST` routes.
+- [ ] Two Lambda functions (or one with routing logic) with an IAM role granting `dynamodb:GetItem`/`Query` and `dynamodb:PutItem`.
+- [ ] DynamoDB table created with an appropriate partition key (and sort key if needed).
+- [ ] CORS enabled on API Gateway so the CloudFront-served frontend can call it.
+- [ ] CloudWatch log groups verified for both Lambda functions and API Gateway execution logs.
 
-- S3 Bucket
-- Lambda Function
-- IAM roles/policies
-- RDS instance (e.g., MySQL/PostgreSQL)
-- CloudWatch (automatic with Lambda)
+---
 
-# Project-2 :- Example-S3-Lambda-CloudFront-DynamoDB-Service
-![Architecture!](https://github.com/vivekSingh1406/AWS-Project-Service/blob/main/Example-S3-Lambda-CloudFront-DynamoDB-Service/project.png)
+## Quick Comparison
 
-### Full Serverless Web Application
-
-- User → CloudFront → S3 → API Gateway → Lambda (GET/POST) → DynamoDB
-- A user accesses a frontend web app (HTML/React/Angular) through CloudFront.
-- The frontend is hosted in an S3 bucket and delivered globally via CloudFront.
-- The frontend makes API calls to API Gateway, which acts as the entry point for backend requests.
-- API Gateway invokes AWS Lambda functions:
-    - GET Lambda → fetches data from DynamoDB.
-    - POST Lambda → stores new data into DynamoDB.
-- DynamoDB is used as the backend database (NoSQL, fully managed).
-- CloudWatch (not shown in diagram but always active) monitors logs and metrics for Lambda/API Gateway.
-
-### Frontend (Static Website)
-
-- Technology: Plain HTML/JS.
-- Hosting: Uploaded to an S3 bucket and distributed through CloudFront.
-- What it does: Displays UI, makes API calls (GET/POST) to backend via API Gateway.
+| | Project 1 (EC2) | Project 2 (S3-Lambda-RDS) | Project 3 (S3-Lambda-CloudFront-DynamoDB) |
+|---|---|---|---|
+| Architecture | Traditional server | Event-driven, semi-serverless | Fully serverless |
+| Database | N/A (app-level) | RDS (relational) | DynamoDB (NoSQL) |
+| Scaling | Manual / needs ASG | Lambda auto-scales | Lambda + CDN auto-scale |
+| Best for | Full control, existing Spring Boot apps | Hybrid apps needing relational data | Static frontends + lightweight APIs |
+| Ops overhead | Higher (patching, scaling) | Medium | Lowest |
