@@ -119,7 +119,7 @@ http://localhost:8080/s3bucket/upload/file/fist-bucket-vivek
 
 ---
 ---
-# 1 - Project:- Example-S3-Lambda-RDS-Service
+# Project-1 :- Example-S3-Lambda-RDS-Service
 ![Architecture!](https://github.com/vivekSingh1406/AWS-Project-Service/blob/main/Example-S3-Lambda-RDS-Service/vivek-singh.png)
 
 
@@ -145,7 +145,7 @@ http://localhost:8080/s3bucket/upload/file/fist-bucket-vivek
 - RDS instance (e.g., MySQL/PostgreSQL)
 - CloudWatch (automatic with Lambda)
 
-# 2 - Project:- Example-S3-Lambda-CloudFront-DynamoDB-Service
+# Project-2 :- Example-S3-Lambda-CloudFront-DynamoDB-Service
 ![Architecture!](https://github.com/vivekSingh1406/AWS-Project-Service/blob/main/Example-S3-Lambda-CloudFront-DynamoDB-Service/project.png)
 
 ### Full Serverless Web Application
