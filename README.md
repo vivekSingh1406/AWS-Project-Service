@@ -1,7 +1,4 @@
-# AWS Deployment Guide — Spring Boot & Serverless Projects
-
-A collection of deployment walkthroughs: a manual EC2 deployment for Spring Boot, plus two serverless architecture projects (S3 → Lambda → RDS, and S3 → Lambda → CloudFront → DynamoDB).
-
+# AWS Deployment — Spring Boot & Serverless Projects
 ---
 
 ## Table of Contents
@@ -28,7 +25,6 @@ Manual deployment of a Spring Boot JAR onto a single EC2 instance — good for l
 ### Step 2 — Connect via SSH
 ```bash
 chmod 400 /path/to/your-key.pem
-ssh -i /path/to/your-key.pem ec2-user@<public-ip-address>      # Amazon Linux
 ssh -i /path/to/your-key.pem ubuntu@<public-ip-address>        # Ubuntu
 ```
 
@@ -206,13 +202,3 @@ User's browser → API Gateway → Lambda (GET/POST) → DynamoDB
 - [ ] CloudWatch log groups verified for both Lambda functions and API Gateway execution logs.
 
 ---
-
-## Quick Comparison
-
-| | Project 1 (EC2) | Project 2 (S3-Lambda-RDS) | Project 3 (S3-Lambda-CloudFront-DynamoDB) |
-|---|---|---|---|
-| Architecture | Traditional server | Event-driven, semi-serverless | Fully serverless |
-| Database | N/A (app-level) | RDS (relational) | DynamoDB (NoSQL) |
-| Scaling | Manual / needs ASG | Lambda auto-scales | Lambda + CDN auto-scale |
-| Best for | Full control, existing Spring Boot apps | Hybrid apps needing relational data | Static frontends + lightweight APIs |
-| Ops overhead | Higher (patching, scaling) | Medium | Lowest |
