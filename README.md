@@ -1,6 +1,5 @@
 # AWS Deployment — Spring Boot & Serverless Projects
 
-## Table of Contents
 1. [Project 1: Deploy Spring Boot on EC2](#project-1-deploy-spring-boot-on-ec2)
 2. [Project 2: S3-Lambda-RDS Service](#project-2-s3-lambda-rds-service)
 3. [Project 3: S3-Lambda-CloudFront-DynamoDB Service](#project-3-s3-lambda-cloudfront-dynamodb-service)
@@ -28,14 +27,6 @@ ssh -i /path/to/your-key.pem ubuntu@<public-ip-address>        # Ubuntu
 ```
 
 ### Step 3 — Install Git, Java, and Maven
-
-**Amazon Linux 2:**
-```bash
-sudo yum update -y
-sudo yum install git -y
-sudo yum install java-17-amazon-corretto -y   # match your project's Java version
-sudo yum install maven -y
-```
 
 **Ubuntu:**
 ```bash
@@ -70,38 +61,6 @@ This produces a JAR under `target/`, typically `target/your-project-name-0.0.1-S
 ```bash
 java -jar target/your-project-name-0.0.1-SNAPSHOT.jar
 ```
-
-**Keep it running after you disconnect SSH** — pick one:
-
-*Option A: `nohup` (simplest)*
-```bash
-nohup java -jar target/your-project-name-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
-```
-
-*Option B: `systemd` service (recommended for anything beyond a demo)*
-```bash
-sudo tee /etc/systemd/system/springapp.service > /dev/null <<EOF
-[Unit]
-Description=Spring Boot Application
-After=network.target
-
-[Service]
-User=ec2-user
-ExecStart=/usr/bin/java -jar /home/ec2-user/your-repository-name/target/your-project-name-0.0.1-SNAPSHOT.jar
-SuccessExitStatus=143
-Restart=on-failure
-RestartSec=10
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-sudo systemctl daemon-reload
-sudo systemctl enable springapp
-sudo systemctl start springapp
-sudo systemctl status springapp
-```
-This auto-restarts the app on crash or reboot, and lets you use `journalctl -u springapp -f` to tail logs.
 
 ### Step 7 — Open the App Port in the Security Group
 1. **EC2 Console → Instances → select instance → Security tab → Security Group**.
