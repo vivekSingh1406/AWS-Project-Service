@@ -1,0 +1,61 @@
+spring:
+  application:
+    name: AmazonS3RDSService
+
+  datasource:
+    url:
+    username: admin
+    password: ChangeMe123!
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+
+  servlet:
+    multipart:
+      max-file-size: 25MB
+      max-request-size: 26MB
+
+
+app:
+  file-validation:
+    max-size: 25MB
+    allowed-content-types:
+      - application/xml
+      - text/xml
+
+  xml:
+    max-depth: 32
+    max-elements: 10000
+    max-total-characters: 2000000
+    max-element-characters: 100000
+
+  s3:
+    bucket: my-java-app-bucket-2026-unique
+    region: ap-south-1
+    endpoint: ${S3_ENDPOINT:}
+    accessKey:
+    secretKey:
+    path-style: false
+    api-call-timeout: 10s
+    api-attempt-timeout: 3s
+    max-retries: 2
+
+  downstream:
+    url: ${DOWNSTREAM_URL:http://localhost:8081}
+    connect-timeout: 2s
+    read-timeout: 5s
+    max-attempts: 3
+    backoff: 100ms
+
+
+management:
+  endpoint:
+    health:
+      show-details: never
+
+  endpoints:
+    web:
+      exposure:
+        include: health,info
